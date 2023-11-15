@@ -33,7 +33,6 @@ LOCATIONS = [
     'Grzegórzki',
     'Prądnik Czerwony',
     'Śródmieście',
-    'Kazimierz',
 ]
 
 AD_TYPES = [
@@ -299,12 +298,6 @@ def apartment_presentation(chosen_apartments: list) -> None:
         print(floor, 'floor')
         print(rooms, 'room' if rooms < 2 else 'rooms')
         print(info, end='\n\n')
-
-
-# type(request):  <class 'requests.models.Response'>
-# type(page_apartments_html):  <class 'bs4.BeautifulSoup'>
-# type(apartment):  <class 'bs4.element.Tag'>
-# type(price_html):  <class 'bs4.element.Tag'>
 
 
 def olx_parser(apartments_url: str = APARTMENTS_URL) -> list:
