@@ -64,7 +64,7 @@ def get_pages_count(url: str) -> int:
     html: str = BeautifulSoup(request.text, 'html.parser')
     page_numbers: list = html.find_all('a', class_='css-1mi714g')
     if page_numbers:
-        page_count = int(page_numbers[-1].text)
+        page_count: int = int(page_numbers[-1].text)
     return page_count
 
 
@@ -143,7 +143,7 @@ def get_floor(paragraphs_list: list) -> int | None:
         floor: str = next(p for p in paragraphs_list if 'Poziom' in p).split()[-1]
         floor: int = 0 if floor == 'Parter' else -1 if floor == 'Suterena' else 4 if floor == 'Poddasze' else int(floor)
     except:
-        floor = None
+        floor: None = None
     return floor
 
 
@@ -151,7 +151,7 @@ def get_building_type(paragraphs_list: list) -> str | None:
     try:
         building_type: str = next(p for p in paragraphs_list if 'Rodzaj zabudowy' in p).split(': ')[-1]
     except:
-        building_type = None
+        building_type: None = None
     return building_type
 
 
@@ -165,8 +165,8 @@ def get_room_count(paragraphs_list: list) -> int:
 
 
 def get_full_price(apartment, paragraphs_list: list) -> float:
+    price: float = get_price(apartment)
     try:
-        price: float = get_price(apartment)
         rent: str = next(p for p in paragraphs_list if 'Czynsz' in p)
         rent: float = float(rent.split(': ')[-1].split(' zł')[0] \
                             .replace(' ', '').replace(',', '.'))
@@ -176,10 +176,10 @@ def get_full_price(apartment, paragraphs_list: list) -> float:
     return full_price
 
 
-def get_apartment_info(apartment, apartment_data):
-    title = apartment.find('h6', {'class': 'css-16v5mdi er34gjf0'}).text.lower()
-    content = apartment_data[0].find('div', {'class': 'css-1t507yq er34gjf0'}).text.lower()
-    info = f'{title}\n{content}'
+def get_apartment_info(apartment, apartment_data) -> str:
+    title: str = apartment.find('h6', {'class': 'css-16v5mdi er34gjf0'}).text.lower()
+    content: str = apartment_data[0].find('div', {'class': 'css-1t507yq er34gjf0'}).text.lower()
+    info: str = f'{title}\n{content}'
     return info
 
 
@@ -193,7 +193,7 @@ def get_apartment_link(apartment) -> str:
         # TODO serve third party sites
 
 
-def apartment_presentation(chosen_apartments):
+def apartment_presentation(chosen_apartments: list) -> None:
     for apartment in chosen_apartments:
         link, location, price, area, building_type, floor, rooms, info = apartment
         print('\n\n', '-' * 120)
@@ -234,14 +234,14 @@ def olx_parser(apartments_url: str = APARTMENTS_URL) -> list:
             precondition: bool = get_precondition(apartment)
 
             if precondition:
-                apartment_link = get_apartment_link(apartment)
+                apartment_link: str = get_apartment_link(apartment)
 
                 if apartment_link:
-                    apartment_data = get_single_apartment(apartment_link)
+                    apartment_data: list = get_single_apartment(apartment_link)
 
                     if apartment_data:
-                        paragraphs = apartment_data[0].find_all('p', {'class': 'css-b5m1rv er34gjf0'})
-                        paragraphs_list = [paragraph.text for paragraph in paragraphs]
+                        paragraphs: list = apartment_data[0].find_all('p', {'class': 'css-b5m1rv er34gjf0'})
+                        paragraphs_list: list = [paragraph.text for paragraph in paragraphs]
 
                         if paragraphs_list:
 
@@ -264,7 +264,7 @@ def olx_parser(apartments_url: str = APARTMENTS_URL) -> list:
                                               room_count_condition and price_rent_condition and heating_condition
 
                             if condition:
-                                apartment_info = [
+                                apartment_info: list = [
                                     apartment_link,
                                     get_location(apartment),
                                     full_price,
