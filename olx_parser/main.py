@@ -99,20 +99,43 @@ def get_apartment_cells(url: str) -> list:
 
 
 def get_single_apartment(url: str) -> list:
+    """
+        The function takes a URL as input, retrieves the HTML content of the webpage,
+        and returns a list of apartment data extracted from the HTML.
+
+        :param url: The `url` parameter is a string that represents the URL of a webpage containing
+        apartment data
+        :return: a list of apartment data.
+    """
     request = requests.get(url)
     html = BeautifulSoup(request.text, 'html.parser')
     apartment_data: list = html.find_all('div', class_='css-1wws9er')
     return apartment_data
 
 
-def get_price(apartment) -> float:
+def get_price(apartment) -> float | None:
+    """
+        The function extracts the price of an apartment from its HTML representation and returns
+        it as a float, or returns None if the price cannot be found.
+
+        :param apartment: The parameter "apartment" is a BeautifulSoup object
+        representing an apartment listing
+        :return: the price of the apartment as a float value.
+    """
     if apartment.find('p'):
         price_html = apartment.find('p', {'class': 'css-10b0gli er34gjf0'})
         price: float = float(price_html.text.split(' zł')[0].replace(' ', '').replace(',', '.'))
         return price
 
 
-def get_location(apartment) -> str:
+def get_location(apartment) -> str | None:
+    """
+        The function extracts the district name from an HTML element representing an apartment.
+
+        :param apartment: The parameter "apartment" is a BeautifulSoup object
+        representing an apartment listing
+        :return: a string value representing the district of the apartment.
+    """
     if apartment.find('p'):
         location_html = apartment.find('p', {'class': 'css-veheph er34gjf0'})
         location: str = location_html.text.split(' - ')[0].split(', ')[1]
@@ -120,6 +143,13 @@ def get_location(apartment) -> str:
 
 
 def get_area(apartment) -> float:
+    """
+        The function extracts the area of an apartment from an HTML element.
+
+        :param apartment: The parameter "apartment" is a BeautifulSoup object
+        representing an apartment listing
+        :return: the area of the apartment as a float value.
+    """
     if apartment.find('span'):
         area_html = apartment.find('span', {'class': 'css-643j0o'})
         area: float = float(area_html.text.split()[0].replace(',', '.'))
@@ -127,6 +157,14 @@ def get_area(apartment) -> float:
 
 
 def get_precondition(apartment) -> bool:
+    """
+        The function checks if an apartment meets certain conditions based on its price, location, and area.
+
+        :param apartment: The "apartment" parameter is the BeautifulSoup object that represents an apartment object.
+        It is used to retrieve information about the apartment such as its price, location, and area
+        :return: a boolean value, which represents whether the given apartment meets the specified
+        preconditions.
+    """
     price: float = get_price(apartment)
     location: str = get_location(apartment)
     area: float = get_area(apartment)
@@ -139,6 +177,16 @@ def get_precondition(apartment) -> bool:
 
 
 def get_floor(paragraphs_list: list) -> int | None:
+    """
+        The function takes a list of paragraphs as input and returns the floor number mentioned
+        in the paragraphs, or None if no floor number is found.
+
+        :param paragraphs_list: The `paragraphs_list` parameter is a list of strings representing paragraphs
+        of text
+        :return: The function returns an integer value representing the floor number if it is
+        found in the given list of paragraphs. If the floor number is not found or if there is an error, it
+        returns `None`.
+    """
     try:
         floor: str = next(p for p in paragraphs_list if 'Poziom' in p).split()[-1]
         floor: int = 0 if floor == 'Parter' else -1 if floor == 'Suterena' else 4 if floor == 'Poddasze' else int(floor)
@@ -148,6 +196,14 @@ def get_floor(paragraphs_list: list) -> int | None:
 
 
 def get_building_type(paragraphs_list: list) -> str | None:
+    """
+        The function takes a list of paragraphs and returns the building type if it is
+        found in one of the paragraphs, otherwise it returns None.
+
+        :param paragraphs_list: A list of paragraphs, where each paragraph is a string
+        :return: The function `get_building_type` returns a string representing the building type if it is
+        found in the list of paragraphs. If the building type is not found, it returns `None`.
+    """
     try:
         building_type: str = next(p for p in paragraphs_list if 'Rodzaj zabudowy' in p).split(': ')[-1]
     except:
@@ -156,6 +212,14 @@ def get_building_type(paragraphs_list: list) -> str | None:
 
 
 def get_room_count(paragraphs_list: list) -> int:
+    """
+        The function takes a list of paragraphs as input and returns the number of rooms
+        mentioned in the paragraphs.
+
+        :param paragraphs_list: The `paragraphs_list` parameter is a list of strings, where each string
+        represents a paragraph of text
+        :return: an integer value, which represents the number of rooms in a given list of paragraphs.
+    """
     try:
         room_count: str = next(p for p in paragraphs_list if 'Liczba pokoi' in p).split(': ')[-1].split()[0]
         room_count: int = 1 if room_count == 'Kawalerka' else int(room_count)
@@ -165,6 +229,15 @@ def get_room_count(paragraphs_list: list) -> int:
 
 
 def get_full_price(apartment, paragraphs_list: list) -> float:
+    """
+        The function calculates the full price of an apartment by adding the price and rent, if available.
+
+        :param apartment: The "apartment" parameter is the BeautifulSoup object that represents the
+        apartment for which we want to calculate the full price.
+        :param paragraphs_list: The `paragraphs_list` parameter is a list of strings. Each string represents
+        a paragraph of text
+        :return: a float value, which represents the full price of an apartment.
+    """
     price: float = get_price(apartment)
     try:
         rent: str = next(p for p in paragraphs_list if 'Czynsz' in p)
@@ -177,6 +250,15 @@ def get_full_price(apartment, paragraphs_list: list) -> float:
 
 
 def get_apartment_info(apartment, apartment_data) -> str:
+    """
+        The function extracts information about an apartment from HTML data and returns it as a string.
+
+        :param apartment: The "apartment" parameter is a BeautifulSoup object representing a specific
+        apartment listing on a website
+        :param apartment_data: The `apartment_data` parameter is a list containing the HTML elements that
+        represent the apartment information
+        :return: a string that contains the ad title and ad content of the apartment.
+    """
     title: str = apartment.find('h6', {'class': 'css-16v5mdi er34gjf0'}).text.lower()
     content: str = apartment_data[0].find('div', {'class': 'css-1t507yq er34gjf0'}).text.lower()
     info: str = f'{title}\n{content}'
@@ -184,6 +266,12 @@ def get_apartment_info(apartment, apartment_data) -> str:
 
 
 def get_apartment_link(apartment) -> str:
+    """
+        The function extracts the link to an apartment from a given HTML element and returns it.
+
+        :param apartment: The "apartment" parameter is a BeautifulSoup object that represents the apartment
+        :return: the apartment link.
+    """
     link: str = apartment.find('a', {'class': 'css-rc5s2u'}).get('href')
     if link.startswith('/'):
         apartment_link: str = MAIN_URL + link
@@ -194,6 +282,12 @@ def get_apartment_link(apartment) -> str:
 
 
 def apartment_presentation(chosen_apartments: list) -> None:
+    """
+        The function `apartment_presentation` takes a list of apartments and prints information about each
+        apartment.
+
+        :param chosen_apartments: A list of apartments that have been chosen for presentation.
+    """
     for apartment in chosen_apartments:
         link, location, price, area, building_type, floor, rooms, info = apartment
         print('\n\n', '-' * 120)
@@ -220,7 +314,7 @@ def olx_parser(apartments_url: str = APARTMENTS_URL) -> list:
 
         :param apartments_url: The `apartments_url` parameter is the URL of the website where the apartments
         are listed
-        :return: The function `olx_parser` returns a list of dictionaries containing information about
+        :return: The function `olx_parser` returns a list of lists containing information about
         chosen apartments.
     """
     chosen_apartments: list = []
